@@ -6,6 +6,7 @@ import {Link} from "react-router-dom";
 import Files from 'react-files'
 import Downloadpicture from '../images/cloud-computing.png'
 import BackArrow from '../images/backArrow.png'
+import DeleteIcon from '../images/delete.png'
 import axios from "axios";
 import LocalStorage from 'local-storage'
 import { CSVLink, CSVDownload } from "react-csv";
@@ -46,6 +47,7 @@ const SavedTests = () => {
   const [reload, setReload] = useState(false)
   const [number, setNumber] = useState('')
   const [name, setName] = useState('')
+  const [improvementFeedback, setImprovementFeedback] = useState('')
   const user_name = LocalStorage.get('username')
 
   let renderTestDetails = () => {
@@ -63,12 +65,15 @@ const SavedTests = () => {
           <Row className="details_row" style={{ borderBottom: '1px solid #e6e6e6' }} > 
             <Col className="test_col">
               <h4 style={{ cursor: 'pointer' }} onClick={() => {
-                getFeedback()
+                getFeedback(test.pk)
                 setFeedback(true)    
               }}>{test.fields.test_name}</h4>
             </Col>
             <Col className="test_col">
               <h4>{test.fields.test_no}</h4>
+            </Col>
+            <Col className="test_col">
+              <img src={DeleteIcon} style={{ marginTop: 2, height: '24px', width: '24px'}} onClick={() => deleteIcon(test.pk)}/>
             </Col>
           </Row>
         );
@@ -84,31 +89,20 @@ const SavedTests = () => {
           improvementFeedbackArr.push(Improvement_Feedback)
           percentageArr.push(Percentage)
           totalArr.push(Total)
-          // delete data.Correct
-          // delete data.Grade
-          // delete data.Improvement_Feedback
-          // delete data.Percentage
-          // delete data.Total
           return (
             <Row className="details_row" onClick={() => {
               modalValues.index = Counter
               setFeedback(true) }}> 
               <Col className="test_col"  >
-                {console.log('Jaani values', data)}
                 <h4 
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
                   footerValues.total = data.Total
-                  // delete data.Total
                   footerValues.percentage = data.Percentage
-                  // delete data.Percentage
                   footerValues.correct = data.Correct
-                  // delete data.Correct
                   footerValues.improvementFeedback = data.Improvement_Feedback
-                  // delete data.Improvement_Feedback
                   footerValues.grade = data.Grade
-                  // delete data.Grade
-                  // delete data['Roll No']
+                  setImprovementFeedback(data.Improvement_Feedback)
                   modalValues['values'] = Object.keys(data).map(a => data[a])
                   setModal(true)}}
                 >
@@ -117,23 +111,37 @@ const SavedTests = () => {
               </Col>
               <Col />
               <Col className="test_col">
-      
                 {arrange(data)}
-                {console.log('headers', headers )}
-                {console.log('datting', dataing )}
                 <CSVLink data={dataing} headers={headers}>
                   Download
                 </CSVLink>;
               </Col>
-            {/* <Col className="test_col">
-              <h4>{test.grade_mark}</h4>
-            </Col> */}
             </Row>
           )
         })
       )
     }
   };
+
+  const deleteIcon = async (id) => {
+    try {
+      console.log('HERE in the world')
+      const config =  {headers : {
+        "Content-Type": "multipart/form-data",
+        }
+      }
+      const formData = new FormData()
+      formData.append('id', id)
+      const result = await axios.post('http://127.0.0.1:8000/deletetest', formData, config)
+      // if (result.status == 200){
+        setReload(!reload)
+        getData()
+      // }
+    }
+    catch (e) {
+      console.log("erroring", e)
+    }
+  }
 
   const arrange = (data) => {
     headers = [
@@ -185,50 +193,38 @@ const SavedTests = () => {
       "Q9_feedback": data.Q9_feedback ,
       "Correct": data.Correct ,
       "Grade": data.Grade ,
-      "Improvement_Feedback": data.Improvement_Feedback ,
+      "Improvement_Feedback": improvementFeedback ,
       "Percentage": data.Percentage ,
       "Total": data.Total ,}
     ]
   }
 
-  const getFeedback = async () => {
+  const getFeedback = async (id) => {
     try {
       setLoading(true)
-      console.log('lol')
       const config =  {headers : {
         "Content-Type": "multipart/form-data",
         }
       }
       const formData = new FormData()
-      formData.append('pk', 1)
+      formData.append('pk', id)
       const result = await axios.post('http://127.0.0.1:8000/showtest', formData, config)
-      console.log('ASI', result.data)
       const arr = []
       Object.keys(result.data).map(v => arr.push(result.data[v]))
-      console.log('AR', arr )
       setFeedbackData(arr)   
     }
     catch (e) {
-
+      console.log('SHOWTESR ERR', e)
     }  
     finally {
       setLoading(false)
     } 
  }
 
-  
-
   useEffect(() => {
     getData()
   }, [feedbackData, ])
 
-  useEffect(() => {
-    // setLoaderContext(true)
-      if (file){
-        
-      }
-    
-  }, [gradefile])
 
   const uploadFIle = async () => {
     const config =  {headers : {
@@ -314,12 +310,21 @@ const SavedTests = () => {
               <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold', color: 'green'}}>Correct Score: </span>{footerValues.correct}</p>
               <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Percentage: </span>{footerValues.percentage}</p>
               <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Grade: </span>{footerValues.grade}</p>
-              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Feedback: </span>{footerValues.improvementFeedback}</p>
+              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Feedback: </span>
+                  <input 
+                    style={{ border: 'none' }}
+                    value={improvementFeedback}
+                    onChange={ v => { 
+                      setImprovementFeedback(v.target.value) 
+                      footerValues.improvementFeedback = v.target.value
+                    }}
+                  />
+                </p>
               <p style={{ marginTop: '0.4rem', marginBottom: '0.2rem', fontWeight: 'bold' }}>Word2Vec model used with accuracy of '74.07%'</p>
             </div>
           </Modal.Footer>
         </Modal>
-        <h1 style={{textAlign: 'center'}}>Welcome back! Here is a summary of your saved tests!</h1>
+        {/* <h1 style={{textAlign: 'center'}}>Welcome back! Here is a summary of your saved tests!</h1> */}
         <div className="test_details" style={{ borderRadius: 10 }}>
           <h2 className="title">
             { 
@@ -332,11 +337,11 @@ const SavedTests = () => {
                 src={ BackArrow } 
               /> : ''
             }
-            ExamApp - Giving Accurate feedback for assesments
+            {/* ExamApp - Giving Accurate feedback for assesments */}
           </h2>
           <div className="details_wrapper">
             <h2 className="details_title">
-              Welcome back, heres a summary of your saved tests
+              {`Welcome back ${user_name}, heres a summary of your saved tests`}
             </h2>
             <Container fluid className="details_header" style={{ backgroundColor: '#001529', borderRadius: 10 }}>
               <Row>
@@ -346,61 +351,62 @@ const SavedTests = () => {
                 <Col className="header_title">
                   <h4 style={{color: '#fff'}}>{!feedbackData ? "Number" : ""}</h4>
                 </Col>
-                {/* <Col className="header_title">
-                  <h4>Grade Mark</h4>
-                </Col> */}
+                <Col className="header_title" />
               </Row>
             </Container>
             <Container className="test_container" fluid>
               {renderTestDetails()}
             </Container>
-            <Container className='upload_container' >
-                <h6 style={{ color: '#a6a6a6', fontSize: '18px' }}>upload your files</h6>
-                <img src={Downloadpicture} style={{ height: '40px', width: '40px'}} onClick={() => {uploadFIle()}}/>
-                <div style={{display: 'flex', justifyContent: 'space-around', marginBottom: '10px'  }} > 
-                  <input 
-                    className='input'
-                    placeholder= 'name'
-                    value = { name }
-                    onChange={ v => setName(v.target.value) }
-                  />
-                  <input 
-                    className='input'
-                    placeholder= 'number'
-                    value= { number }
-                    onChange= { v => setNumber(v.target.value) }
-                  />
-                </div> 
-                <div style={{display: 'flex', justifyContent: 'space-around',   }} > 
-                <Files
-                  className='files-dropzone'
-                  onChange={ e => setFile(e[0])}
-                  // onError={this.onFilesError}
-                  accepts={['image/png', '.pdf', 'audio/*', '.zip', '.csv']}
-                  multiple
-                  maxFileSize={10000000}
-                  minFileSize={0}
-                  clickable
-                >
-                  <button className='btns'>Student answers</button>
-                </Files>
-                <Files
-                  className='files-dropzone'
-                  onChange={ e => setGradeFile(e[0])}
-                  // onError={this.onFilesError}
-                  accepts={['image/png', '.pdf', 'audio/*', '.zip', '.csv']}
-                  multiple
-                  maxFileSize={10000000}
-                  minFileSize={0}
-                  clickable
-                >
-                  <button className='btns'>Question Answers</button>
-                </Files>     
-                </div>
-            </Container>
+            { !feedbackData ?
+              <Container className='upload_container' >
+                  <h6 style={{ color: '#a6a6a6', fontSize: '18px' }}>upload your files</h6>
+                  <img src={Downloadpicture} style={{ height: '40px', width: '40px'}} onClick={() => {uploadFIle()}}/>
+                  <div style={{display: 'flex', justifyContent: 'space-around', marginBottom: '10px'  }} > 
+                    <input 
+                      className='input'
+                      placeholder= 'name'
+                      value = { name }
+                      onChange={ v => setName(v.target.value) }
+                    />
+                    <input 
+                      className='input'
+                      placeholder= 'number'
+                      value= { number }
+                      onChange= { v => setNumber(v.target.value) }
+                    />
+                  </div> 
+                  <div style={{display: 'flex', justifyContent: 'space-around',   }} > 
+                  <Files
+                    className='files-dropzone'
+                    onChange={ e => setFile(e[0])}
+                    // onError={this.onFilesError}
+                    accepts={['image/png', '.pdf', 'audio/*', '.zip', '.csv']}
+                    multiple
+                    maxFileSize={10000000}
+                    minFileSize={0}
+                    clickable
+                  >
+                    <button className='btns'>Question Answers</button>
+                  </Files>
+                  <Files
+                    className='files-dropzone'
+                    onChange={ e => setGradeFile(e[0])}
+                    // onError={this.onFilesError}
+                    accepts={['image/png', '.pdf', 'audio/*', '.zip', '.csv']}
+                    multiple
+                    maxFileSize={10000000}
+                    minFileSize={0}
+                    clickable
+                  >
+                    <button className='btns'>Student answers</button>
+                  </Files>     
+                  </div>
+              </Container>
+              : 
+              ''
+            }
           </div>
-            
-          <h2 className="copyright">Copyright @2021</h2>
+          
         </div>
       </div>
     }

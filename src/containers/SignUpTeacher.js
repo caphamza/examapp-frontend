@@ -3,7 +3,7 @@ import { Form, Input, Icon, Button, Select, Avatar } from 'antd';
 import { connect } from 'react-redux';
 import { NavLink, useHistory } from 'react-router-dom';
 import axios from "axios";
-import * as actions from '../store/actions/authActions';
+import Notifications, {notify} from 'react-notify-toast';
 const {Option} = Select;
 const FormItem = Form.Item;
 
@@ -29,6 +29,7 @@ const RegistrationForm = () => {
       }
     })
     .then(res => {
+      notify.show("Signup Successfull")
       history.push('/login')
       console.log('res', res)
     }).catch (e => {
@@ -39,7 +40,7 @@ const RegistrationForm = () => {
   
   return (
     <Form onSubmit={handleSubmit}>
-      
+      <Notifications/>
       <FormItem>   
         <Input 
           prefix={<Icon type="user"  />} 

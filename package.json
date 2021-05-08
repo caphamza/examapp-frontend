@@ -27,6 +27,7 @@
     "react-icons": "^2.2.7",
     "react-json-to-csv": "^1.0.4",
     "react-minimal-pie-chart": "^6.0.1",
+    "react-notify-toast": "^0.5.1",
     "react-redux": "^7.2.0",
     "react-route-guard": "^1.0.7",
     "react-router-dom": "^5.1.2",
