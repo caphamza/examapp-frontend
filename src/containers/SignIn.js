@@ -122,7 +122,7 @@ const  NormalLoginForm = () => {
                 or
                 <NavLink 
                   style={{marginRight: '11px'}} 
-                  to="/registerteacher/"> Sign Up As a teacher ef
+                  to="/registerteacher/"> Sign Up As a teacher
                 </NavLink>
             </FormItem>
           </Form>

@@ -8,11 +8,20 @@ import Downloadpicture from '../images/cloud-computing.png'
 import BackArrow from '../images/backArrow.png'
 import axios from "axios";
 import LocalStorage from 'local-storage'
+import { CSVLink, CSVDownload } from "react-csv";
 
 // import { CgDatabase } from "react-icons/cg";
 const modalValues = {
   values: [],
-  index: 1
+}
+
+const footerValues = {
+  total: '',
+  correct: '',
+  grade: '',
+  improvementFeedback: '',
+  percentage: '',
+  rollNo: ''
 }
 
 const correctArr = []
@@ -21,14 +30,10 @@ const improvementFeedbackArr = []
 const percentageArr = []
 const totalArr = []
 
+let headers
+let dataing
+
 const SavedTests = () => {
-  let userName = "ADI"
-  const obj = {
-    a: 1,
-    b:2,
-    c:3,
-    d: 4
-  }
 
   // const [loaderContext, setLoaderContext] = useContext(LoaderContext)
   const [file, setFile] = useState('')
@@ -70,7 +75,7 @@ const SavedTests = () => {
       });
     }
     else if (feedback && feedbackData) {
-      let counter = 0 
+      let Counter = 0 
       return (
         feedbackData.map( data => {
           const { Correct, Grade, Improvement_Feedback, Percentage, Total } = data
@@ -79,41 +84,112 @@ const SavedTests = () => {
           improvementFeedbackArr.push(Improvement_Feedback)
           percentageArr.push(Percentage)
           totalArr.push(Total)
-          delete data.Correct
-          delete data.Grade
-          delete data.Improvement_Feedback
-          delete data.Percentage
-          delete data.Total
-          const values = Object.keys(data).map(a => data[a])
+          // delete data.Correct
+          // delete data.Grade
+          // delete data.Improvement_Feedback
+          // delete data.Percentage
+          // delete data.Total
           return (
             <Row className="details_row" onClick={() => {
-              modalValues.index = counter
+              modalValues.index = Counter
               setFeedback(true) }}> 
               <Col className="test_col"  >
                 {console.log('Jaani values', data)}
                 <h4 
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
-                  modalValues['values'] = values
+                  footerValues.total = data.Total
+                  // delete data.Total
+                  footerValues.percentage = data.Percentage
+                  // delete data.Percentage
+                  footerValues.correct = data.Correct
+                  // delete data.Correct
+                  footerValues.improvementFeedback = data.Improvement_Feedback
+                  // delete data.Improvement_Feedback
+                  footerValues.grade = data.Grade
+                  // delete data.Grade
+                  // delete data['Roll No']
+                  modalValues['values'] = Object.keys(data).map(a => data[a])
                   setModal(true)}}
                 >
                   {data['Roll No']}
                 </h4>
               </Col>
               <Col />
-              {/* <Col className="test_col">
-                <h4>{data.Q1_feedback}</h4>
-              </Col> */}
+              <Col className="test_col">
+      
+                {arrange(data)}
+                {console.log('headers', headers )}
+                {console.log('datting', dataing )}
+                <CSVLink data={dataing} headers={headers}>
+                  Download
+                </CSVLink>;
+              </Col>
             {/* <Col className="test_col">
               <h4>{test.grade_mark}</h4>
             </Col> */}
             </Row>
           )
-          counter++
         })
       )
     }
   };
+
+  const arrange = (data) => {
+    headers = [
+      { label: "Roll No", key: "Roll No" },
+      { label: "Q1", key: "Q1" },
+      { label: "Q1_feedback", key: "Q1_feedback" },
+      { label: "Q2", key: "Q2" },
+      { label: "Q2_feedback", key: "Q2_feedback" },
+      { label: "Q3", key: "Q3" },
+      { label: "Q3_feedback", key: "Q3_feedback" },
+      { label: "Q4", key: "Q4" },
+      { label: "Q4_feedback", key: "Q4_feedback" },
+      { label: "Q5", key: "Q5" },
+      { label: "Q5_feedback", key: "Q5_feedback" },
+      { label: "Q6", key: "Q6" },
+      { label: "Q6_feedback", key: "Q6_feedback" },
+      { label: "Q7", key: "Q7" },
+      { label: "Q7_feedback", key: "Q7_feedback" },
+      { label: "Q8", key: "Q8" },
+      { label: "Q8_feedback", key: "Q8_feedback" },
+      { label: "Q9", key: "Q9" },
+      { label: "Q9_feedback", key: "Q9_feedback" },
+      { label: "Correct", key: "Correct" },
+      { label: "Grade", key: "Grade" },
+      { label: "Improvement_Feedback", key: "Improvement_Feedback" },
+      { label: "Percentage", key: "Percentage" },
+      { label: "Total", key: "Total" },
+    ]
+
+    dataing = [
+      { "Roll No": data["Roll No"], 
+      "Q1": data.Q1,
+      "Q1_feedback": data.Q1_feedback,
+      "Q2": data.Q2 ,
+      "Q2_feedback": data.Q2_feedback ,
+      "Q3": data.Q3 ,
+      "Q3_feedback": data.Q3_feedback ,
+      "Q4": data.Q4 ,
+      "Q4_feedback": data.Q4_feedback ,
+      "Q5": data.Q5 ,
+      "Q5_feedback": data.Q5_feedback ,
+      "Q6": data.Q6 ,
+      "Q6_feedback": data.Q6_feedback ,
+      "Q7": data.Q7 ,
+      "Q7_feedback": data.Q7_feedback ,
+      "Q8": data.Q8,
+      "Q8_feedback": data.Q8_feedback ,
+      "Q9": data.Q9 ,
+      "Q9_feedback": data.Q9_feedback ,
+      "Correct": data.Correct ,
+      "Grade": data.Grade ,
+      "Improvement_Feedback": data.Improvement_Feedback ,
+      "Percentage": data.Percentage ,
+      "Total": data.Total ,}
+    ]
+  }
 
   const getFeedback = async () => {
     try {
@@ -215,12 +291,11 @@ const SavedTests = () => {
         <Modal show={modal} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Result</Modal.Title>
-
           </Modal.Header>
           <Modal.Body>
-            {              
-              modalValues.values.map(data => {
-                console.log('DAT DATA DTA', typeof(data))
+            {       
+                     
+              modalValues.values.slice(0, -6).map((data) => {
                 return (
                   <>
                     <h6 
@@ -235,9 +310,12 @@ const SavedTests = () => {
           </Modal.Body>
           <Modal.Footer className='mr-auto modal_footer'>
             <div>
-              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Total Score: </span>{totalArr[modalValues.index]}</p>
-              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Grade: </span>{gradeArr[modalValues.index]}</p>
-              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Feedback: </span>{improvementFeedbackArr[modalValues.index]}</p>
+              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Total Score: </span>{footerValues.total}</p>
+              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold', color: 'green'}}>Correct Score: </span>{footerValues.correct}</p>
+              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Percentage: </span>{footerValues.percentage}</p>
+              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Grade: </span>{footerValues.grade}</p>
+              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Feedback: </span>{footerValues.improvementFeedback}</p>
+              <p style={{ marginTop: '0.4rem', marginBottom: '0.2rem', fontWeight: 'bold' }}>Word2Vec model used with accuracy of '74.07%'</p>
             </div>
           </Modal.Footer>
         </Modal>
@@ -258,7 +336,7 @@ const SavedTests = () => {
           </h2>
           <div className="details_wrapper">
             <h2 className="details_title">
-              Welcome back {userName} heres a summary of your saved tests
+              Welcome back, heres a summary of your saved tests
             </h2>
             <Container fluid className="details_header" style={{ backgroundColor: '#001529', borderRadius: 10 }}>
               <Row>

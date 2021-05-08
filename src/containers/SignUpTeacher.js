@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Input, Icon, Button, Select, Avatar } from 'antd';
 import { connect } from 'react-redux';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useHistory } from 'react-router-dom';
 import axios from "axios";
 import * as actions from '../store/actions/authActions';
 const {Option} = Select;
@@ -9,10 +9,13 @@ const FormItem = Form.Item;
 
 const RegistrationForm = () => {
   
+  const history = useHistory();
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [errorMSg, setErrMsg] = useState('')
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,8 +29,10 @@ const RegistrationForm = () => {
       }
     })
     .then(res => {
+      history.push('/login')
       console.log('res', res)
     }).catch (e => {
+      setErrMsg('Something went wrong')
       console.log('Error', e)
     })
   }
@@ -85,7 +90,7 @@ const RegistrationForm = () => {
           to='/login'> login as a teacher
       </NavLink>
       </FormItem>
-
+      <p style={{color: 'red'}}>{errorMSg}</p>
     </Form>
   );
 }
