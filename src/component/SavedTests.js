@@ -48,6 +48,7 @@ const SavedTests = () => {
   const [number, setNumber] = useState('')
   const [name, setName] = useState('')
   const [improvementFeedback, setImprovementFeedback] = useState('')
+  const [errormsg, setErrorMsg] = useState('')
   const user_name = LocalStorage.get('username')
 
   let renderTestDetails = () => {
@@ -229,6 +230,7 @@ const SavedTests = () => {
 
   const uploadFIle = async () => {
     if (name && number && file && gradefile){
+      setErrorMsg('')
       const config =  {headers : {
         "Content-Type": "multipart/form-data",
         }
@@ -247,6 +249,9 @@ const SavedTests = () => {
       }).catch(err => {
         setLoading(false)
       })
+    }
+    else {
+      setErrorMsg("Error! Something's missing, please fill all the required fields.")
     }
     
   }
@@ -408,6 +413,15 @@ const SavedTests = () => {
               </Container>
               : 
               ''
+            }
+            {
+                !feedbackData ?
+                  errormsg ? 
+                    <p style={{color: 'red'}}>{errormsg}</p>
+                  :
+                  ''
+                  : 
+                  ''
             }
           </div>
           

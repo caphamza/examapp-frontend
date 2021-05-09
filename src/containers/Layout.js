@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { Layout, Menu, Breadcrumb, Avatar, Popover} from 'antd';
 import {Link, withRouter} from "react-router-dom";
 import "../css/Layout.css"
@@ -8,71 +8,85 @@ import axios from "axios";
 import LocalStorage from 'local-storage'
 
 const { Header, Content, Footer } = Layout;
-class CustomLayout extends React.Component {
-    constructor(props)
-    {
-        super(props)
-        this.state = {
-            users: [],
-            profile: [],
-            profilePic: ""
-        }
-    }
-    componentDidMount(){
-        axios.all([
-            axios.get('http://127.0.0.1:8000/api/users'),
-            axios.get('http://127.0.0.1:8000/api/list/profile'),
-        ])
-        .then(axios.spread((users, profile) => {
-                this.setState({
-                    users: users.data,
-                    profile: profile.data,
-                })
-                console.log(this.state.users)
-                console.log(this.state.profile)
+// class CustomLayout extends React.Component {
+//     constructor(props)
+//     {
+//         super(props)
+//         this.state = {
+//             users: [],
+//             profile: [],
+//             profilePic: ""
+//         }
+//     }
+    // componentDidMount(){
+    //     axios.all([
+    //         axios.get('http://127.0.0.1:8000/api/users'),
+    //         axios.get('http://127.0.0.1:8000/api/list/profile'),
+    //     ])
+    //     .then(axios.spread((users, profile) => {
+    //             this.setState({
+    //                 users: users.data,
+    //                 profile: profile.data,
+    //             })
+    //             console.log(this.state.users)
+    //             console.log(this.state.profile)
                 
-        }))
-        // if(this.props.signup == true)
-        // {
-        //     this.props.history.push('/login');  
-        // }
-    }
-    logout = () => {
-        this.props.isAuthenticated = false;
-        this.props.history.push('/login');  
-    }
-    render(){
-        let tempUsers = this.state.users
-        let tempProfile = this.state.profile
-        let id = this.props.username
-        let user_id = 0
-        let profile_picture = ""
-        let department = ""
-        let role = ""
-        const auth = LocalStorage.get('auth')
-        console.log(this.props.signup)
-        tempUsers.map(function(item, i){
-            if(item.username == id)
-            {
-              user_id = item.id
-            } 
-            console.log(user_id)
-        })
-        tempProfile.map(function(item, i){
-            if(item.user == user_id)
-            {                
-                profile_picture = item.avatar;
-                department = item.department;
-                role = item.user_type;
-            }
-        })
-        const profileContent = (
-            <div>
-              <p>Name: {id}</p>
-              <p>Department: {department}</p>
-              <p>Role: {role}</p>
-            </div>
-          );
+    //     }))
+    //     // if(this.props.signup == true)
+    //     // {
+    //     //     this.props.history.push('/login');  
+    //     // }
+    // }
+    // logout = () => {
+    //     this.props.isAuthenticated = false;
+    //     this.props.history.push('/login');  
+    // }
+    // render(){
+    //     let tempUsers = this.state.users
+    //     let tempProfile = this.state.profile
+    //     let id = this.props.username
+    //     let user_id = 0
+    //     let profile_picture = ""
+    //     let department = ""
+    //     let role = ""
+    //     const auth = LocalStorage.get('auth')
+    //     const user_name = LocalStorage.get('username')
+    //     console.log(this.props.signup)
+    //     tempUsers.map(function(item, i){
+    //         if(item.username == id)
+    //         {
+    //           user_id = item.id
+    //         } 
+    //         console.log(user_id)
+    //     })
+    //     tempProfile.map(function(item, i){
+    //         if(item.user == user_id)
+    //         {                
+    //             profile_picture = item.avatar;
+    //             department = item.department;
+    //             role = item.user_type;
+    //         }
+    //     })
+    //     const profileContent = (
+    //         <div>
+    //           <p>Name: {id}</p>
+    //           <p>Department: {department}</p>
+    //           <p>Role: {role}</p>
+    //         </div>
+    //       );
+
+    const CustomLayout = (props) => {
+
+        const [auth, setAuth] = useState('')
+        const [user_name, setUser_name] = useState('')
+        const [reload, setReload] = useState(false)
+
+        useEffect(() => {
+            console.log('Effecting')
+            setAuth(LocalStorage.get('auth'))
+            setUser_name(LocalStorage.get('username'))
+        },[reload])
+
         return(
             <Layout className="layout">
             <Header>
@@ -85,21 +99,27 @@ class CustomLayout extends React.Component {
                 defaultSelectedKeys={['5']}
                 style={{ lineHeight: '64px', fontSize: '15px'}}
             >
-                <Menu.Item style={{float: 'left', color: 'skyblue', fontSize: '29px'}} key="22">
+                <Menu.Item style={{float: 'left', color: 'skyblue', fontSize: '29px'}} key="22" onClick={() => setReload(!reload)}>
                    {/*<Link to="/"> Feedback</Link>*/}
                    <Link to="/">Exam App</Link>
                 </Menu.Item>
-                {
-                    this.props.isAuthenticated ?                     
-                    <Menu.Item key="6" onClick={this.props.logout} style={{ justifyContent: 'space-between'}}>
-                        Logout
-                    </Menu.Item>
-                     :
-                    <Menu.Item key="4" onClick={() => LocalStorage.set('auth', false)}>
+
+                    <Menu.Item key="4" onClick={() => {
+                        LocalStorage.set('auth', false)
+                        setReload(!reload)
+                        }}>
                         <Link to="/login">{ !auth ? 'Login' : 'Logout' }</Link>
                     </Menu.Item>
-                }
                 {
+                    auth ?
+                    <Menu.Item key="6" style={{ justifyContent: 'space-between'}} onClick={() => setReload(!reload)}>
+                        <Link to={'/savedtests/' + user_name + '/'}>Assesments</Link> 
+                    </Menu.Item>
+                    : 
+                    ''
+                }
+                    
+                {/* {
                     this.props.isAuthenticated ? 
                     <Menu.Item key="1">
                             <Link to={'/modulesList/' + this.props.username + '/'}>Modules that you teach</Link>
@@ -122,7 +142,7 @@ class CustomLayout extends React.Component {
                         </Menu.Item>
                     : 
                     null
-                }
+                } */}
                 <Menu.Item key="3">
                     <Link to="/grade">Grading</Link>
                 </Menu.Item>
@@ -132,7 +152,7 @@ class CustomLayout extends React.Component {
                 <Menu.Item key="8">
                     <Link to="/FAQ">FAQ</Link>
                 </Menu.Item>
-                {
+                {/* {
                     this.props.isAuthenticated ? 
                     
                     <Menu.Item key="56">
@@ -142,7 +162,7 @@ class CustomLayout extends React.Component {
                     </Menu.Item>
                     :
                     null
-                }
+                } */}
                 
             </Menu>
             </Header>
@@ -152,17 +172,13 @@ class CustomLayout extends React.Component {
                 <div className="title"> ExamApp - Giving accurate feedback for assessments </div>
             </Breadcrumb>
             <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
-                {this.props.children}
+                {props.children}
             </div>
             </Content>
             <Footer style={{ textAlign: 'center' }}>Copyright ©2021</Footer>
         </Layout>
         );
-    }
+    
 }
-const mapDispatchToProps = dispatch => {
-    return {
-      logout: () => dispatch(actions.logout()),
-    }
-}
-export default withRouter(connect(null, mapDispatchToProps)(CustomLayout));
+
+export default CustomLayout;
