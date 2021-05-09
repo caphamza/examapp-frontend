@@ -61,6 +61,7 @@ const SavedTests = () => {
       );
     } else if (!feedback) {
       return data.map((test) => {
+        console.log('MAPING', test)
         return (
           <Row className="details_row" style={{ borderBottom: '1px solid #e6e6e6' }} > 
             <Col className="test_col">
@@ -227,24 +228,27 @@ const SavedTests = () => {
 
 
   const uploadFIle = async () => {
-    const config =  {headers : {
-      "Content-Type": "multipart/form-data",
+    if (name && number && file && gradefile){
+      const config =  {headers : {
+        "Content-Type": "multipart/form-data",
+        }
       }
+      const formData = new FormData()
+      formData.append('name', name)
+      formData.append('no', number)
+      formData.append('id', user_name)
+      formData.append('test_file', file)
+      formData.append('grades_file', gradefile)
+      setLoading(true)
+      axios.post('http://127.0.0.1:8000/addtest', formData, config ).then(res => {
+        setReload(!reload)
+        setLoading(false)
+        getData()
+      }).catch(err => {
+        setLoading(false)
+      })
     }
-    const formData = new FormData()
-    formData.append('name', name)
-    formData.append('no', number)
-    formData.append('id', user_name)
-    formData.append('test_file', file)
-    formData.append('grades_file', gradefile)
-    setLoading(true)
-    axios.post('http://127.0.0.1:8000/addtest', formData, config ).then(res => {
-      setReload(!reload)
-      setLoading(false)
-      getData()
-    }).catch(err => {
-      setLoading(false)
-    })
+    
   }
 
   const getData = async () => {
@@ -310,9 +314,9 @@ const SavedTests = () => {
               <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold', color: 'green'}}>Correct Score: </span>{footerValues.correct}</p>
               <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Percentage: </span>{footerValues.percentage}</p>
               <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Grade: </span>{footerValues.grade}</p>
-              <p style={{marginBottom: '0.2rem'}}><span style={{fontWeight: 'bold'}}>Feedback: </span>
+              <p style={{marginBottom: '0.2rem', width: '100%'}}><span style={{fontWeight: 'bold'}}>Feedback: </span>
                   <input 
-                    style={{ border: 'none' }}
+                    style={{ border: 'none', width: '80%' }}
                     value={improvementFeedback}
                     onChange={ v => { 
                       setImprovementFeedback(v.target.value) 
@@ -320,7 +324,7 @@ const SavedTests = () => {
                     }}
                   />
                 </p>
-              <p style={{ marginTop: '0.4rem', marginBottom: '0.2rem', fontWeight: 'bold' }}>Word2Vec model used with accuracy of '74.07%'</p>
+              <p style={{ marginTop: '0.4rem', marginBottom: '0.2rem', fontWeight: 'bold' }}>Word2Vec model is used with the accuracy of '74.07%'</p>
             </div>
           </Modal.Footer>
         </Modal>

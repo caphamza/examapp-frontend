@@ -16,8 +16,16 @@ class WelcomePage extends React.Component {
     <div className="welcomediv" style={{display: 'flex', justifyContent: 'center'}} >
       <PageHeader ghost={false} subTitle="" extra={[]}>
         <div style={{textAlign: 'center',  marginLeft: "30%", marginRight: '50%', margin: '23px'}}>
-          <Link to="/login"><Button size="large" style={{margin: '5px'}}key="3">Login</Button></Link>
-          <Link to="/registerteacher/"><Button size="large" key="2">Sign Up</Button></Link>
+          {
+            !auth ?
+            <>
+              <Link to="/login"><Button size="large" style={{margin: '5px'}}key="3">Login</Button></Link>
+              <Link to="/registerteacher/"><Button size="large" key="2">Sign Up</Button></Link>
+            </>
+            :
+            ''
+          }
+
         </div>
           <p style={{textAlign: 'center', color: 'black', fontSize: '29px'}}>Here are a list of features that this web application has to offer!</p>
         
