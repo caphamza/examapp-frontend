@@ -76,16 +76,18 @@ const { Header, Content, Footer } = Layout;
     //       );
 
     const CustomLayout = (props) => {
-
+        console.log('PROPS', props)
         const [auth, setAuth] = useState('')
         const [user_name, setUser_name] = useState('')
         const [reload, setReload] = useState(false)
-
+        setInterval(()=> {
+            setAuth(LocalStorage.get('auth'))
+        },100)
         useEffect(() => {
             console.log('Effecting')
             setAuth(LocalStorage.get('auth'))
             setUser_name(LocalStorage.get('username'))
-        },[reload])
+        },[reload, LocalStorage.get('auth')])
 
         return(
             <Layout className="layout">
@@ -111,12 +113,10 @@ const { Header, Content, Footer } = Layout;
                         <Link to="/login">{ !auth ? 'Login' : 'Logout' }</Link>
                     </Menu.Item>
                 {
-                    auth ?
                     <Menu.Item key="6" style={{ justifyContent: 'space-between'}} onClick={() => setReload(!reload)}>
-                        <Link to={'/savedtests/' + user_name + '/'}>Assesments</Link> 
+                        <Link to={auth ? '/savedtests/' + user_name + '/' : '/'}>Assesments</Link> 
                     </Menu.Item>
-                    : 
-                    ''
+
                 }
                     
                 {/* {
